@@ -42,7 +42,7 @@ static esp_err_t send_get_response(httpd_req_t *req, boiler_controller_state_t b
     esp_err_t error = json_serializer_serialize(&boiler_state, &serialized_string, &length);
     if (error != ESP_OK) return error;
     ESP_LOGI(TAG, "Response body: %s", serialized_string);
-    httpd_resp_set_hdr(req, "Content-Type", "application/json");
+    httpd_resp_set_type(req, "application/json");
     httpd_resp_send(req, serialized_string, length);
     json_serializer_free(serialized_string);
     return ESP_OK;
