@@ -26,12 +26,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MAIN_HTTP_ADAPTER_PLAIN_H_
-#define MAIN_HTTP_ADAPTER_PLAIN_H_
+#ifndef MAIN_HTTP_ADAPTER_HTML_H_
+#define MAIN_HTTP_ADAPTER_HTML_H_
 
 #include <esp_http_server.h>
 #include "esp_err.h"
 
-esp_err_t http_adapter_plain_init(httpd_handle_t* server);
+esp_err_t http_adapter_html_init(httpd_handle_t *server);
 
-#endif /* MAIN_HTTP_ADAPTER_PLAIN_H_ */
+#endif /* MAIN_HTTP_ADAPTER_HTML_H_ */

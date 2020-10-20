@@ -44,7 +44,6 @@ static esp_mqtt_client_handle_t mqtt_client = NULL;
 
 esp_err_t get_switch_from_json(esp_mqtt_event_handle_t event, bool *value, uint32_t *timeout)
 {
-    esp_err_t error = ESP_FAIL;
     char *received_data = malloc((event->data_len + 1) * sizeof(char));
     memcpy(received_data, event->data, event->data_len);
     received_data[event->data_len] = '\0';
@@ -85,10 +84,11 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
         if (is_valid_switch_request(event))
         {
             bool switch_on;
-            esp_err_t  error = get_switch_from_json(event, &switch_on);
+            uint32_t timeout;
+            esp_err_t  error = get_switch_from_json(event, &switch_on, &timeout);
             if (error == ESP_OK)
             {
-                boiler_controller_set_state(switch_on);
+                boiler_controller_set_state(switch_on, timeout);
             }
             else
             {

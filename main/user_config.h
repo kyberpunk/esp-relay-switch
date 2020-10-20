@@ -29,13 +29,13 @@
 #ifndef MAIN_USER_CONFIG_H_
 #define MAIN_USER_CONFIG_H_
 
-#define WIFI_SSID "***REMOVED***"
+#define WIFI_SSID "ssid"
 
-#define WIFI_PASSWORD "***REMOVED***"
+#define WIFI_PASSWORD "password"
 
 #define RELAY_GPIO_NUM 4
 
-#define HTTP_PLAIN_ENABLE 1
+#define HTTP_HTML_ENABLE 1
 
 #define HTTP_JSON_ENABLE 1
 
@@ -43,7 +43,7 @@
 
 #define HIGH_ON 0
 
-#define MQTT_BROKER_HOST "192.168.0.46"
+#define MQTT_BROKER_HOST "192.168.100.46"
 
 #define BOILER_ID "BOILER1"
 

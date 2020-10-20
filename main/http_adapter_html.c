@@ -33,7 +33,7 @@
 #include <esp_err.h>
 
 #include "boiler_controller.h"
-#include "http_adapter_plain.h"
+#include "http_adapter_html.h"
 
 #define DEFAULT_HTML "<!DOCTYPE html>\n" \
 "<html>\n" \
@@ -53,7 +53,7 @@
 "\n" \
 "<form action=\"/state\" method=\"POST\">\n" \
 "  <input type=\"hidden\" name=\"switch_on\" value=\"%s\">\n" \
-"  <input type=\"number\" name=\"timeout\" value=\"0\">\n" \
+"  Timeout (ms): <input type=\"number\" name=\"timeout\" value=\"0\"><br/>\n" \
 "  <input type=\"submit\" value=\"%s\">\n" \
 "</form>\n" \
 "\n" \
@@ -148,7 +148,8 @@ static esp_err_t send_get_response(httpd_req_t *req, boiler_controller_state_t b
     }
 
     size_t resp_len = snprintf(resp, buf_len, DEFAULT_HTML, is_switched_on_string, formated_time_string, boiler_state.switch_timeout_millis, form_action_value, submit_string);
-    return httpd_resp_send(req, resp, resp_len);
+    httpd_resp_send(req, resp, resp_len);
+    return ESP_OK;
 }
 
 static esp_err_t get_handler(httpd_req_t *req)
@@ -172,7 +173,7 @@ static esp_err_t parse_switch_payload(httpd_req_t *req, bool *value, uint32_t *t
         error = httpd_query_key_value(buf, "switch_on", param, sizeof(param));
         if (error == ESP_OK)
         {
-            ESP_LOGW(TAG, "switch_on parameter: %s", param);
+            ESP_LOGI(TAG, "switch_on parameter: %s", param);
             bool switch_on = get_bool_from_string(param);
             *value = switch_on;
         }
@@ -184,8 +185,8 @@ static esp_err_t parse_switch_payload(httpd_req_t *req, bool *value, uint32_t *t
         error = httpd_query_key_value(buf, "timeout", timeout_param, sizeof(timeout_param));
         if (error == ESP_OK)
         {
-            ESP_LOGW(TAG, "timeout paramter: %s", timeout_param);
-            *timeout = get_uint_from_string(param);
+            ESP_LOGI(TAG, "timeout paramter: %s", timeout_param);
+            *timeout = get_uint_from_string(timeout_param);
         }
         else
         {
@@ -209,7 +210,7 @@ static esp_err_t post_handler(httpd_req_t *req)
     const char* resp;
     if (error == ESP_OK)
     {
-        boiler_controller_set_state(switch_on);
+        boiler_controller_set_state(switch_on, timeout);
         resp = POST_SUCCESS_RESPONSE_HTML;
     }
     else
@@ -218,11 +219,11 @@ static esp_err_t post_handler(httpd_req_t *req)
         ESP_LOGW(TAG, "Request parse failed: %s", error_string);
         resp = POST_ERROR_RESPONSE_HTML;
     }
-    return httpd_resp_send(req, resp, strlen(resp));
-    return ESP_OK;
+    httpd_resp_send(req, resp, strlen(resp));
+    return error;
 }
 
-esp_err_t http_adapter_plain_init(httpd_handle_t server)
+esp_err_t http_adapter_html_init(httpd_handle_t* server)
 {
     httpd_uri_t uri_get =
     {

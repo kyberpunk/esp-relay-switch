@@ -26,10 +26,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <esp_log.h>
+#include <string.h>
+
 #include "json_serializer.h"
 #include "user_config.h"
 #include "parson.h"
-#include <esp_log.h>
+
+#define TAG "json_serializer"
 
 esp_err_t json_serializer_deserialize(const char *received_data, bool *value, uint32_t *timeout)
 {
@@ -37,15 +41,20 @@ esp_err_t json_serializer_deserialize(const char *received_data, bool *value, ui
     JSON_Value *root_value;
     JSON_Object *switch_data;
     root_value = json_parse_string(received_data);
-    if (root_value == NULL) return error;
+    if (root_value == NULL)
+    {
+        ESP_LOGE(TAG, "Cannot parse JSON.");
+        return error;
+    }
     switch_data = json_value_get_object(root_value);
-    const char *switch_on_name = "switchOn";
+    const char *switch_on_name = "switchedOn";
     if (json_object_has_value_of_type(switch_data, switch_on_name, JSONBoolean))
     {
         *value = json_object_get_boolean(switch_data, switch_on_name);
     }
     else
     {
+        ESP_LOGE(TAG, "switchOn property not found in JSON.");
         error = ESP_ERR_NOT_FOUND;
         goto exit;
     }
@@ -56,7 +65,11 @@ esp_err_t json_serializer_deserialize(const char *received_data, bool *value, ui
         error = ESP_OK;
         goto exit;
     }
-    error = ESP_ERR_NOT_FOUND;
+    else
+    {
+        ESP_LOGE(TAG, "timeout property not found in JSON.");
+        error = ESP_ERR_NOT_FOUND;
+    }
 exit:
     json_value_free(root_value);
     return error;

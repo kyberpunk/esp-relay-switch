@@ -42,7 +42,8 @@
 #include <esp_http_server.h>
 
 #include "boiler_controller.h"
-#include "http_adapter_plain.h"
+#include "http_adapter_html.h"
+#include "http_adapter_json.h"
 #include "mqtt_adapter.h"
 #include "platform_time.h"
 #include "user_config.h"
@@ -164,11 +165,11 @@ void app_main(void)
     ESP_ERROR_CHECK(mqtt_adapter_init());
 #endif
 
-#if HTTP_PLAIN_ENABLE || HTTP_JSON_ENABLE
+#if HTTP_HTML_ENABLE || HTTP_JSON_ENABLE
     ESP_ERROR_CHECK(httpd_start(&server, &config));
 #endif
-#if HTTP_PLAIN_ENABLE
-    ESP_ERROR_CHECK(http_adapter_plain_init(server));
+#if HTTP_HTML_ENABLE
+    ESP_ERROR_CHECK(http_adapter_html_init(server));
 #endif
 #if HTTP_JSON_ENABLE
     ESP_ERROR_CHECK(http_adapter_json_init(server));

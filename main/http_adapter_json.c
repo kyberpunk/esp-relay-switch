@@ -26,6 +26,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <esp_log.h>
+
 #include "http_adapter_json.h"
 #include "boiler_controller.h"
 #include "json_serializer.h"
@@ -39,9 +41,11 @@ static esp_err_t send_get_response(httpd_req_t *req, boiler_controller_state_t b
     char *serialized_string = NULL;
     esp_err_t error = json_serializer_serialize(&boiler_state, &serialized_string, &length);
     if (error != ESP_OK) return error;
-    error = httpd_resp_send(req, serialized_string, length);
+    ESP_LOGI(TAG, "Response body: %s", serialized_string);
+    httpd_resp_set_hdr(req, "Content-Type", "application/json");
+    httpd_resp_send(req, serialized_string, length);
     json_serializer_free(serialized_string);
-    return error;
+    return ESP_OK;
 }
 
 static esp_err_t get_handler(httpd_req_t *req)
@@ -56,21 +60,38 @@ static esp_err_t post_handler(httpd_req_t *req)
     size_t buf_len = req->content_len + 1;
     bool switch_on = false;
     uint32_t timeout = 0;
+    boiler_controller_state_t boiler_state;
     if (buf_len > 1)
     {
         char* buf = malloc(buf_len * sizeof(char));
         memset(buf, 0, buf_len);
         httpd_req_recv(req, buf, buf_len);
-        ESP_LOGI(TAG, "/api/state URI called. Body: %s", buf);
+        ESP_LOGI(TAG, "/api/state URI called. Body:\n%s", buf);
         error = json_serializer_deserialize(buf, &switch_on, &timeout);
-        if (error != ESP_OK) return error;
+        if (error != ESP_OK)
+        {
+            ESP_LOGE(TAG, "JSON deserialization failed.");
+            goto exit;
+        }
         error = boiler_controller_set_state(switch_on, timeout);
+        if (error != ESP_OK)
+        {
+            ESP_LOGE(TAG, "JSON boiler_controller_set_state failed.");
+        }
         free(buf);
+
+        boiler_state = boiler_controller_get_state();
+        boiler_state.switch_timeout_millis = timeout;
+        send_get_response(req, boiler_state);
+        return ESP_OK;
     }
     else
     {
         ESP_LOGW(TAG, "Content is empty.");
     }
+
+exit:
+    httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, NULL);
     return error;
 }
 

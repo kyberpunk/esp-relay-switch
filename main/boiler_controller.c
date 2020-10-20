@@ -31,6 +31,8 @@
 #include <driver/gpio.h>
 #include <esp_log.h>
 #include <esp_err.h>
+#include <time.h>
+#include <sys/time.h>
 
 #include "boiler_controller.h"
 #include "user_config.h"
@@ -38,12 +40,33 @@
 
 #define TAG "boiler_controller"
 
+typedef struct scheduled_switch
+{
+    uint32_t timeout;
+    bool is_switched_on;
+} scheduled_switch_t;
+
+static scheduled_switch_t scheduled_switch = { 0, false };
+
 static state_changed_cb_t state_changed_callback = NULL;
 static void* state_changed_context = NULL;
 static boiler_controller_state_t current_state;
-static TickType_t timeout_start = 0;
-static uint32_t switch_timeout = 0;
+static uint64_t timeout_start = 0;
 static TaskHandle_t timeout_task = NULL;
+
+static esp_err_t boiler_controller_set_state_internal(bool switch_on, uint32_t timeout);
+
+/**
+ * Get current UTC time in ms (synchronized by SNTP)
+ */
+static uint64_t get_utc_now()
+{
+    struct timeval tv;
+    uint64_t millisecondsSinceEpoch = 0;
+    gettimeofday(&tv, NULL);
+    millisecondsSinceEpoch = (uint64_t) (tv.tv_sec) * 1000 + (uint64_t) (tv.tv_usec) / 1000;
+    return millisecondsSinceEpoch;
+}
 
 esp_err_t boiler_controller_init()
 {
@@ -64,7 +87,7 @@ esp_err_t boiler_controller_init()
     return result;
 }
 
-static bool get_switch_value(switch_on)
+static bool get_switch_value(bool switch_on)
 {
 #if HIGH_ON
     return switch_on;
@@ -75,51 +98,68 @@ static bool get_switch_value(switch_on)
 
 static void boiler_controller_timeout_task(void* pvParameters)
 {
-    uint32_t timeout = *((uint32_t*)pvParameters);
-    TickType_t timeout_start = xTaskGetTickCount();
-    ESP_LOGI(TAG, "Scheduling timeout to: %lu ms", timeout);
-    vTaskDelayUntil(&timeout_start, timeout / portTICK_PERIOD_MS);
-    boiler_controller_set_state(!current_state.is_switched_on, 0);
+    scheduled_switch_t scheduled_switch = *((scheduled_switch_t*)pvParameters);
+    timeout_start = get_utc_now();
+    TickType_t now = xTaskGetTickCount();
+    ESP_LOGI(TAG, "Scheduling timeout to: %u ms", scheduled_switch.timeout);
+    vTaskDelayUntil(&now, scheduled_switch.timeout / portTICK_PERIOD_MS);
+    boiler_controller_set_state_internal(scheduled_switch.is_switched_on, 0);
+
+    scheduled_switch.is_switched_on = false;
+    scheduled_switch.timeout = 0;
+    timeout_task = NULL;
     vTaskDelete(NULL);
 }
 
 static uint32_t boiler_controller_get_expire_ms()
 {
-    TickType_t now = xTaskGetTickCount();
-    if (now <= timeout_start)
+    uint64_t now = get_utc_now();
+    if (scheduled_switch.timeout == 0 || now <= timeout_start)
     {
         return 0;
     }
-    uint32_t diff = (now - timeout_start) * portTICK_PERIOD_MS;
-    if (diff > switch_timeout)
+    uint32_t diff = (uint32_t)(now - timeout_start);
+    if (diff > scheduled_switch.timeout)
     {
         return 0;
     }
-    return switch_timeout - diff;
+    return scheduled_switch.timeout - diff;
 }
 
 esp_err_t boiler_controller_set_state(bool switch_on, uint32_t timeout)
 {
-	ESP_LOGI(TAG, "Set new state: %s", switch_on ? "true" : "false");
-	esp_err_t error = gpio_set_level(RELAY_GPIO_NUM, (uint32_t)get_switch_value(switch_on));
-	if (error != ESP_OK)
-	{
-		ESP_LOGE(TAG, "gpio_set_level failed: %d", error);
-		return error;
-	}
-	current_state.is_switched_on = switch_on;
-	current_state.last_change_utc_millis = platform_get_utc_millis();
-	current_state.switch_timeout_millis = boiler_controller_get_expire_ms();
-	if (timeout > 0)
-	{
-	    switch_timeout = timeout;
-	    xTaskCreate(boiler_controller_timeout_task, "measurement_task_run", 4096, &switch_timeout, tskIDLE_PRIORITY, &timeout_task);
-	}
-	if (state_changed_callback != NULL)
-	{
-		state_changed_callback(&current_state, state_changed_context);
-	}
-	return ESP_OK;
+    if (timeout_task != NULL)
+    {
+        scheduled_switch.is_switched_on = false;
+        scheduled_switch.timeout = 0;
+        vTaskDelete(timeout_task);
+    }
+	return boiler_controller_set_state_internal(switch_on, timeout);
+}
+
+esp_err_t boiler_controller_set_state_internal(bool switch_on, uint32_t timeout)
+{
+    ESP_LOGI(TAG, "Set new state: %s", switch_on ? "true" : "false");
+    esp_err_t error = gpio_set_level(RELAY_GPIO_NUM, (uint32_t)get_switch_value(switch_on));
+    if (error != ESP_OK)
+    {
+        ESP_LOGE(TAG, "gpio_set_level failed: %d", error);
+        return error;
+    }
+    current_state.is_switched_on = switch_on;
+    current_state.last_change_utc_millis = platform_get_utc_millis();
+    current_state.switch_timeout_millis = timeout;
+    if (timeout > 0)
+    {
+        scheduled_switch.timeout = timeout;
+        scheduled_switch.is_switched_on = !switch_on;
+        xTaskCreate(boiler_controller_timeout_task, "measurement_task_run", 4096, &scheduled_switch, tskIDLE_PRIORITY, &timeout_task);
+    }
+    if (state_changed_callback != NULL)
+    {
+        state_changed_callback(&current_state, state_changed_context);
+    }
+    return ESP_OK;
 }
 
 boiler_controller_state_t boiler_controller_get_state()
