@@ -133,7 +133,7 @@ static void initialize_sntp(void)
 void boiler_state_changed(const boiler_controller_state_t* boiler_controller_state, void* context)
 {
 #if MQTT_ADAPTER_ENABLE
-    mqtt_adapter_notify_boiler_status();
+    mqtt_adapter_notify_boiler_status(boiler_controller_state);
 #endif
 }
 

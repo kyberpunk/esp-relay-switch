@@ -128,12 +128,11 @@ esp_err_t mqtt_adapter_init()
     return error;
 }
 
-esp_err_t mqtt_adapter_notify_boiler_status()
+esp_err_t mqtt_adapter_notify_boiler_status(const boiler_controller_state_t* boiler_state)
 {
     char *serialized_string = NULL;
     size_t length = 0;
-    boiler_controller_state_t boiler_state = boiler_controller_get_state();
-    esp_err_t error = json_serializer_serialize(&boiler_state, &serialized_string, &length);
+    esp_err_t error = json_serializer_serialize(boiler_state, &serialized_string, &length);
     if (error != ESP_OK) return error;
     esp_mqtt_client_publish(mqtt_client, MQTT_STATE_TOPIC, serialized_string, length, 1, false);
     json_serializer_free(serialized_string);
