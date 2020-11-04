@@ -3,7 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := boiler-controller
+PROJECT_NAME := relay-switch
 
 include $(IDF_PATH)/make/project.mk
 

@@ -30,10 +30,11 @@
 #define MAIN_MQTT_ADAPTER_H_
 
 #include <esp_err.h>
-#include "boiler_controller.h"
+
+#include "relay_switch.h"
 
 esp_err_t mqtt_adapter_init(void);
 
-esp_err_t mqtt_adapter_notify_boiler_status(const boiler_controller_state_t* boiler_state);
+esp_err_t mqtt_adapter_notify_switch_status(const relay_switch_state_t* switch_state);
 
 #endif /* MAIN_MQTT_ADAPTER_H_ */

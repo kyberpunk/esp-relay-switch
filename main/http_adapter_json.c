@@ -29,17 +29,17 @@
 #include <esp_log.h>
 
 #include "http_adapter_json.h"
-#include "boiler_controller.h"
 #include "json_serializer.h"
+#include "relay_switch.h"
 #include "user_config.h"
 
 #define TAG "http_adapter_json"
 
-static esp_err_t send_get_response(httpd_req_t *req, boiler_controller_state_t boiler_state)
+static esp_err_t send_get_response(httpd_req_t *req, relay_switch_state_t switch_state)
 {
     size_t length = 0;
     char *serialized_string = NULL;
-    esp_err_t error = json_serializer_serialize(&boiler_state, &serialized_string, &length);
+    esp_err_t error = json_serializer_serialize(&switch_state, &serialized_string, &length);
     if (error != ESP_OK) return error;
     ESP_LOGI(TAG, "Response body: %s", serialized_string);
     httpd_resp_set_type(req, "application/json");
@@ -50,8 +50,8 @@ static esp_err_t send_get_response(httpd_req_t *req, boiler_controller_state_t b
 
 static esp_err_t get_handler(httpd_req_t *req)
 {
-    boiler_controller_state_t boiler_state = boiler_controller_get_state();
-    return send_get_response(req, boiler_state);
+    relay_switch_state_t switch_state = relay_switch_get_state();
+    return send_get_response(req, switch_state);
 }
 
 static esp_err_t post_handler(httpd_req_t *req)
@@ -60,7 +60,7 @@ static esp_err_t post_handler(httpd_req_t *req)
     size_t buf_len = req->content_len + 1;
     bool switch_on = false;
     uint32_t timeout = 0;
-    boiler_controller_state_t boiler_state;
+    relay_switch_state_t switch_state;
     if (buf_len > 1)
     {
         char* buf = malloc(buf_len * sizeof(char));
@@ -73,16 +73,16 @@ static esp_err_t post_handler(httpd_req_t *req)
             ESP_LOGE(TAG, "JSON deserialization failed.");
             goto exit;
         }
-        error = boiler_controller_set_state(switch_on, timeout);
+        error = relay_switch_set_state(switch_on, timeout);
         if (error != ESP_OK)
         {
-            ESP_LOGE(TAG, "JSON boiler_controller_set_state failed.");
+            ESP_LOGE(TAG, "JSON relay_switch_set_state failed.");
         }
         free(buf);
 
-        boiler_state = boiler_controller_get_state();
-        boiler_state.switch_timeout_millis = timeout;
-        send_get_response(req, boiler_state);
+        switch_state = relay_switch_get_state();
+        switch_state.switch_timeout_millis = timeout;
+        send_get_response(req, switch_state);
         return ESP_OK;
     }
     else

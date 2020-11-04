@@ -30,11 +30,12 @@
 #define JSON_SERIALIZER_H_
 
 #include <stdio.h>
-#include "boiler_controller.h"
+
+#include "relay_switch.h"
 
 esp_err_t json_serializer_deserialize(const char *received_data, bool *value, uint32_t *timeout);
 
-esp_err_t json_serializer_serialize(const boiler_controller_state_t *boiler_state, char **serialized_string, size_t *length);
+esp_err_t json_serializer_serialize(const relay_switch_state_t *switch_state, char **serialized_string, size_t *length);
 
 void json_serializer_free(char *serialized_string);
 

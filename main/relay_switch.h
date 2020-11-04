@@ -26,29 +26,29 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MAIN_BOILER_CONTROLLER_H_
-#define MAIN_BOILER_CONTROLLER_H_
+#ifndef MAIN_RELAY_SWITCH_H_
+#define MAIN_RELAY_SWITCH_H_
 
 #include <stdbool.h>
 #include <inttypes.h>
 
 #include <esp_err.h>
 
-typedef struct boiler_controller_state
+typedef struct relay_switch_state
 {
 	bool is_switched_on;
 	uint32_t switch_timeout_millis;
 	uint64_t last_change_utc_millis;
-} boiler_controller_state_t;
+} relay_switch_state_t;
 
-typedef void (*state_changed_cb_t)(const boiler_controller_state_t* boiler_controller_state, void* context);
+typedef void (*state_changed_cb_t)(const relay_switch_state_t* relay_switch_state, void* context);
 
-esp_err_t boiler_controller_init(void);
+esp_err_t relay_switch_init(void);
 
-esp_err_t boiler_controller_set_state(bool switch_on, uint32_t timeout);
+esp_err_t relay_switch_set_state(bool switch_on, uint32_t timeout);
 
-boiler_controller_state_t boiler_controller_get_state(void);
+relay_switch_state_t relay_switch_get_state(void);
 
-void boiler_controller_set_state_changed_cb(state_changed_cb_t callback, void* context);
+void relay_switch_set_state_changed_cb(state_changed_cb_t callback, void* context);
 
-#endif /* MAIN_BOILER_CONTROLLER_H_ */
+#endif /* MAIN_RELAY_SWITCH_H_ */

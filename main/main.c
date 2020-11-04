@@ -41,11 +41,11 @@
 #include <esp_sntp.h>
 #include <esp_http_server.h>
 
-#include "boiler_controller.h"
 #include "http_adapter_html.h"
 #include "http_adapter_json.h"
 #include "mqtt_adapter.h"
 #include "platform_time.h"
+#include "relay_switch.h"
 #include "user_config.h"
 
 #define TAG "main"
@@ -130,10 +130,10 @@ static void initialize_sntp(void)
     sntp_init();
 }
 
-void boiler_state_changed(const boiler_controller_state_t* boiler_controller_state, void* context)
+void switch_state_changed(const relay_switch_state_t* relay_switch_state, void* context)
 {
 #if MQTT_ADAPTER_ENABLE
-    mqtt_adapter_notify_boiler_status(boiler_controller_state);
+    mqtt_adapter_notify_switch_status(relay_switch_state);
 #endif
 }
 
@@ -174,8 +174,8 @@ void app_main(void)
 #if HTTP_JSON_ENABLE
     ESP_ERROR_CHECK(http_adapter_json_init(server));
 #endif
-    ESP_ERROR_CHECK(boiler_controller_init());
-    boiler_controller_set_state_changed_cb(boiler_state_changed, NULL);
+    ESP_ERROR_CHECK(relay_switch_init());
+    relay_switch_set_state_changed_cb(switch_state_changed, NULL);
 }
 
 uint64_t platform_get_utc_millis()

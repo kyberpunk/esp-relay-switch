@@ -45,6 +45,6 @@
 
 #define MQTT_BROKER_HOST "192.168.100.46"
 
-#define BOILER_ID "BOILER1"
+#define SWITCH_ID "SWITCH1"
 
 #endif /* MAIN_USER_CONFIG_H_ */

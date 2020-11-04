@@ -32,12 +32,12 @@
 #include <esp_log.h>
 
 #include "mqtt_adapter.h"
-#include "boiler_controller.h"
 #include "json_serializer.h"
+#include "relay_switch.h"
 #include "user_config.h"
 
-#define MQTT_STATE_TOPIC "boiler/state"
-#define MQTT_SWITCH_TOPIC "boiler/" BOILER_ID "/switch"
+#define MQTT_STATE_TOPIC "switch/state"
+#define MQTT_SWITCH_TOPIC "switch/" SWITCH_ID "/switch"
 #define TAG "mqtt_adapter"
 
 static esp_mqtt_client_handle_t mqtt_client = NULL;
@@ -88,7 +88,7 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
             esp_err_t  error = get_switch_from_json(event, &switch_on, &timeout);
             if (error == ESP_OK)
             {
-                boiler_controller_set_state(switch_on, timeout);
+                relay_switch_set_state(switch_on, timeout);
             }
             else
             {
@@ -128,11 +128,11 @@ esp_err_t mqtt_adapter_init()
     return error;
 }
 
-esp_err_t mqtt_adapter_notify_boiler_status(const boiler_controller_state_t* boiler_state)
+esp_err_t mqtt_adapter_notify_switch_status(const relay_switch_state_t* switch_state)
 {
     char *serialized_string = NULL;
     size_t length = 0;
-    esp_err_t error = json_serializer_serialize(boiler_state, &serialized_string, &length);
+    esp_err_t error = json_serializer_serialize(switch_state, &serialized_string, &length);
     if (error != ESP_OK) return error;
     esp_mqtt_client_publish(mqtt_client, MQTT_STATE_TOPIC, serialized_string, length, 1, false);
     json_serializer_free(serialized_string);

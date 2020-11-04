@@ -32,21 +32,21 @@
 #include <esp_log.h>
 #include <esp_err.h>
 
-#include "boiler_controller.h"
 #include "http_adapter_html.h"
+#include "relay_switch.h"
 
 #define DEFAULT_HTML "<!DOCTYPE html>\n" \
 "<html>\n" \
 "<head>\n" \
 "<title>\n" \
-"Boiler Controller\n" \
+"Relay Switch\n" \
 "</title>\n" \
 "</head>\n" \
 "<body>\n" \
 "\n" \
-"<h2>Boiler Controller</h2>\n" \
+"<h2>Relay Switch</h2>\n" \
 "<p>\n" \
-"Current boiler state: %s<br/>\n" \
+"Current switch state: %s<br/>\n" \
 "Last change: %s\n" \
 "Switch timeout: %d ms\n" \
 "</p>\n" \
@@ -131,13 +131,13 @@ static uint32_t get_uint_from_string(const char *value)
     return result;
 }
 
-static esp_err_t send_get_response(httpd_req_t *req, boiler_controller_state_t boiler_state)
+static esp_err_t send_get_response(httpd_req_t *req, relay_switch_state_t switch_state)
 {
-    const char *is_switched_on_string = get_string_from_bool(boiler_state.is_switched_on);
-    const char *form_action_value = get_string_from_bool(!boiler_state.is_switched_on);
-    time_t epoch = boiler_state.last_change_utc_millis / 1000;
+    const char *is_switched_on_string = get_string_from_bool(switch_state.is_switched_on);
+    const char *form_action_value = get_string_from_bool(!switch_state.is_switched_on);
+    time_t epoch = switch_state.last_change_utc_millis / 1000;
     const char *formated_time_string = asctime(gmtime (&epoch));
-    const char *submit_string = boiler_state.is_switched_on ? switch_off_string : switch_on_string;
+    const char *submit_string = switch_state.is_switched_on ? switch_off_string : switch_on_string;
 
     size_t buf_len = strlen(DEFAULT_HTML) + strlen(is_switched_on_string) + strlen(form_action_value)
         + strlen(formated_time_string) + 1;
@@ -147,15 +147,15 @@ static esp_err_t send_get_response(httpd_req_t *req, boiler_controller_state_t b
         return ESP_ERR_NO_MEM;
     }
 
-    size_t resp_len = snprintf(resp, buf_len, DEFAULT_HTML, is_switched_on_string, formated_time_string, boiler_state.switch_timeout_millis, form_action_value, submit_string);
+    size_t resp_len = snprintf(resp, buf_len, DEFAULT_HTML, is_switched_on_string, formated_time_string, switch_state.switch_timeout_millis, form_action_value, submit_string);
     httpd_resp_send(req, resp, resp_len);
     return ESP_OK;
 }
 
 static esp_err_t get_handler(httpd_req_t *req)
 {
-    boiler_controller_state_t boiler_state = boiler_controller_get_state();
-    send_get_response(req, boiler_state);
+    relay_switch_state_t switch_state = relay_switch_get_state();
+    send_get_response(req, switch_state);
     return ESP_OK;
 }
 
@@ -210,7 +210,7 @@ static esp_err_t post_handler(httpd_req_t *req)
     const char* resp;
     if (error == ESP_OK)
     {
-        boiler_controller_set_state(switch_on, timeout);
+        relay_switch_set_state(switch_on, timeout);
         resp = POST_SUCCESS_RESPONSE_HTML;
     }
     else

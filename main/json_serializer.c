@@ -75,15 +75,15 @@ exit:
     return error;
 }
 
-esp_err_t json_serializer_serialize(const boiler_controller_state_t *boiler_state, char **serialized_string, size_t *length)
+esp_err_t json_serializer_serialize(const relay_switch_state_t *switch_state, char **serialized_string, size_t *length)
 {
     JSON_Value *root_value = json_value_init_object();
     JSON_Object *root_object = json_value_get_object(root_value);
 
-    json_object_set_string(root_object, "id", BOILER_ID);
-    json_object_set_boolean(root_object, "switchedOn", boiler_state->is_switched_on);
-    json_object_set_number(root_object, "timeout", boiler_state->switch_timeout_millis);
-    json_object_set_number(root_object, "lastChangeUtcMillis", boiler_state->last_change_utc_millis);
+    json_object_set_string(root_object, "id", SWITCH_ID);
+    json_object_set_boolean(root_object, "switchedOn", switch_state->is_switched_on);
+    json_object_set_number(root_object, "timeout", switch_state->switch_timeout_millis);
+    json_object_set_number(root_object, "lastChangeUtcMillis", switch_state->last_change_utc_millis);
 
     *serialized_string = json_serialize_to_string_pretty(root_value);
     if (*serialized_string == NULL) return ESP_FAIL;

@@ -34,11 +34,11 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include "boiler_controller.h"
+#include "relay_switch.h"
 #include "user_config.h"
 #include "platform_time.h"
 
-#define TAG "boiler_controller"
+#define TAG "relay_switch"
 
 typedef struct scheduled_switch
 {
@@ -50,11 +50,11 @@ static scheduled_switch_t scheduled_switch = { 0, false };
 
 static state_changed_cb_t state_changed_callback = NULL;
 static void* state_changed_context = NULL;
-static boiler_controller_state_t current_state;
+static relay_switch_state_t current_state;
 static uint64_t timeout_start = 0;
 static TaskHandle_t timeout_task = NULL;
 
-static esp_err_t boiler_controller_set_state_internal(bool switch_on, uint32_t timeout);
+static esp_err_t relay_switch_set_state_internal(bool switch_on, uint32_t timeout);
 
 /**
  * Get current UTC time in ms (synchronized by SNTP)
@@ -68,7 +68,7 @@ static uint64_t get_utc_now()
     return millisecondsSinceEpoch;
 }
 
-esp_err_t boiler_controller_init()
+esp_err_t relay_switch_init()
 {
     current_state.is_switched_on = false;
     current_state.last_change_utc_millis = platform_get_utc_millis();
@@ -96,14 +96,14 @@ static bool get_switch_value(bool switch_on)
 #endif
 }
 
-static void boiler_controller_timeout_task(void* pvParameters)
+static void relay_switch_timeout_task(void* pvParameters)
 {
     scheduled_switch_t scheduled_switch = *((scheduled_switch_t*)pvParameters);
     timeout_start = get_utc_now();
     TickType_t now = xTaskGetTickCount();
     ESP_LOGI(TAG, "Scheduling timeout to: %u ms", scheduled_switch.timeout);
     vTaskDelayUntil(&now, scheduled_switch.timeout / portTICK_PERIOD_MS);
-    boiler_controller_set_state_internal(scheduled_switch.is_switched_on, 0);
+    relay_switch_set_state_internal(scheduled_switch.is_switched_on, 0);
 
     scheduled_switch.is_switched_on = false;
     scheduled_switch.timeout = 0;
@@ -111,7 +111,7 @@ static void boiler_controller_timeout_task(void* pvParameters)
     vTaskDelete(NULL);
 }
 
-static uint32_t boiler_controller_get_expire_ms()
+static uint32_t relay_switch_get_expire_ms()
 {
     uint64_t now = get_utc_now();
     if (scheduled_switch.timeout == 0 || now <= timeout_start)
@@ -126,7 +126,7 @@ static uint32_t boiler_controller_get_expire_ms()
     return scheduled_switch.timeout - diff;
 }
 
-esp_err_t boiler_controller_set_state(bool switch_on, uint32_t timeout)
+esp_err_t relay_switch_set_state(bool switch_on, uint32_t timeout)
 {
     if (timeout_task != NULL)
     {
@@ -134,10 +134,10 @@ esp_err_t boiler_controller_set_state(bool switch_on, uint32_t timeout)
         scheduled_switch.timeout = 0;
         vTaskDelete(timeout_task);
     }
-	return boiler_controller_set_state_internal(switch_on, timeout);
+	return relay_switch_set_state_internal(switch_on, timeout);
 }
 
-esp_err_t boiler_controller_set_state_internal(bool switch_on, uint32_t timeout)
+esp_err_t relay_switch_set_state_internal(bool switch_on, uint32_t timeout)
 {
     ESP_LOGI(TAG, "Set new state: %s", switch_on ? "true" : "false");
     esp_err_t error = gpio_set_level(RELAY_GPIO_NUM, (uint32_t)get_switch_value(switch_on));
@@ -153,7 +153,7 @@ esp_err_t boiler_controller_set_state_internal(bool switch_on, uint32_t timeout)
     {
         scheduled_switch.timeout = timeout;
         scheduled_switch.is_switched_on = !switch_on;
-        xTaskCreate(boiler_controller_timeout_task, "measurement_task_run", 4096, &scheduled_switch, tskIDLE_PRIORITY, &timeout_task);
+        xTaskCreate(relay_switch_timeout_task, "measurement_task_run", 4096, &scheduled_switch, tskIDLE_PRIORITY, &timeout_task);
     }
     if (state_changed_callback != NULL)
     {
@@ -162,13 +162,13 @@ esp_err_t boiler_controller_set_state_internal(bool switch_on, uint32_t timeout)
     return ESP_OK;
 }
 
-boiler_controller_state_t boiler_controller_get_state()
+relay_switch_state_t relay_switch_get_state()
 {
-    current_state.switch_timeout_millis = boiler_controller_get_expire_ms();
+    current_state.switch_timeout_millis = relay_switch_get_expire_ms();
 	return current_state;
 }
 
-void boiler_controller_set_state_changed_cb(state_changed_cb_t callback, void* context)
+void relay_switch_set_state_changed_cb(state_changed_cb_t callback, void* context)
 {
 	state_changed_callback = callback;
 	state_changed_context = context;
