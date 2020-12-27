@@ -47,4 +47,6 @@
 
 #define SWITCH_ID "SWITCH1"
 
+#define NTP_SERVER "pool.ntp.org"
+
 #endif /* MAIN_USER_CONFIG_H_ */
