@@ -38,7 +38,7 @@ Wiring is quite simple. 5V relay is controlled by GPIO4 pin of ESP-32 which is c
 
 ### Example wiring for watering
 
-Following example shows prototype wiring for controlling water pump. For symplicity development boards are used. There is plenty of water pumps on Amazon on Aliexpress which can be powered by 5V source and are efficient enough to water room plants.
+Following example shows prototype wiring for controlling water pump. For symplicity development boards (ESP32S-HiLetgo) are used. There is plenty of water pumps on Amazon on Aliexpress which can be powered by 5V source and are efficient enough to water room plants.
 
 ![example wiring](doc/wiring_example.png)
 
