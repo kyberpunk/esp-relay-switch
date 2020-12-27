@@ -104,12 +104,19 @@
 
 static const char* true_string = "true";
 static const char* false_string = "false";
+static const char* on_string = "on";
+static const char* off_string = "off";
 static const char* switch_on_string = "Switch on";
 static const char* switch_off_string = "Switch off";
 
 static const char* get_string_from_bool(bool value)
 {
     return value ? true_string : false_string;
+}
+
+static const char* get_on_off_string_from_bool(bool value)
+{
+    return value ? on_string : off_string;
 }
 
 static bool get_bool_from_string(const char *value)
@@ -133,7 +140,7 @@ static uint32_t get_uint_from_string(const char *value)
 
 static esp_err_t send_get_response(httpd_req_t *req, relay_switch_state_t switch_state)
 {
-    const char *is_switched_on_string = get_string_from_bool(switch_state.is_switched_on);
+    const char *is_switched_on_string = get_on_off_string_from_bool(switch_state.is_switched_on);
     const char *form_action_value = get_string_from_bool(!switch_state.is_switched_on);
     time_t epoch = switch_state.last_change_utc_millis / 1000;
     const char *formated_time_string = asctime(gmtime (&epoch));
