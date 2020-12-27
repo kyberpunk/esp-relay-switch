@@ -28,7 +28,7 @@ Device uses SNTP protocol for time synchronization. Internet network must be acc
 
 ## Requirements
 
-* [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html#step-2-get-esp-idf) installed
+* [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html#step-2-get-esp-idf) installed (at least version 4.2)
 * ESP-32 SoC or [development board](https://www.espressif.com/en/products/devkits)
 * Bistable relay with 5V coil
 
