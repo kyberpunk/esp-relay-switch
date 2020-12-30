@@ -24,7 +24,7 @@ Firmware is written in C using official [ESP-IDF](https://docs.espressif.com/pro
 * Safety timeout mechanism which will change switch position after configured time
 * Time synchronization using SNTP
 
-Device uses SNTP protocol for time synchronization. Internet network must be accessible form subnet where the device is connected or IP addrss of local NTP server (e.g. Raspberry Pi) must be provided.
+Device uses SNTP protocol for time synchronization. Internet network must be accessible form subnet where the device is connected or IP address of local NTP server (e.g. Raspberry Pi) must be provided. Switch state does not persist after restart.
 
 ## Requirements
 
@@ -164,10 +164,10 @@ Firmware settings such as connection credentials can be configured in [main/user
 | WIFI_SSID           | Wi-Fi ssid                                                              |
 | WIFI_PASSWORD       | Wi-Fi password                                                          |
 | RELAY_GPIO_NUM      | GPIO pin number used for relay (default 4)                              |
-| HTTP_HTML_ENABLE    | Set to 0 to disable web interface (default 1)                           |
-| HTTP_JSON_ENABLE    | Set to 0 to disable HTTP API (default 1)                                |
-| MQTT_ADAPTER_ENABLE | Set to 0 to disable MQTT interface (default 1)                          |
+| HTTP_HTML_ENABLE    | Set to 1 to enable HTML web interface or 0 to disable (default 1)       |
+| HTTP_JSON_ENABLE    | Set to 1 to enable HTTP API or 0 to disable (default 1)                 |
+| MQTT_ADAPTER_ENABLE | Set to 1 to enable MQTT interface or 0 to disable (default 1)           |
 | HIGH_ON             | Set to 1 if relay is connected by high input or 0 otherwise (default 0) |
 | MQTT_BROKER_HOST    | IP address or DNS name of MQTT broker                                   |
 | SWITCH_ID           | Unique device ID - important for MQTT (default SWITCH1)                 |
-| NTP_SERVER          | NTP server DNS or IP (default pool.ntp.org)                             |
+| NTP_SERVER          | NTP server DNS name or IP (default pool.ntp.org)                        |

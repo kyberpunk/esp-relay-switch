@@ -26,6 +26,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @file
+ * @author Vit Holasek
+ * @brief This file contains basic functions for obtaining real and system time.
+ */
+
 #ifndef MAIN_PLATFORM_TIME_H_
 #define MAIN_PLATFORM_TIME_H_
 

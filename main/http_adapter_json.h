@@ -26,12 +26,23 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @file
+ * @author Vit Holasek
+ * @brief This file contains functions for managing HTTP API adapter. Adapter provides HTTP API with JSON payload for controlling the switch.
+ */
+
 #ifndef MAIN_HTTP_ADAPTER_JSON_H_
 #define MAIN_HTTP_ADAPTER_JSON_H_
 
 #include <esp_http_server.h>
 #include "esp_err.h"
 
+/**
+ * Initialize and start HTML API adapter. HTTP server is started and handles appropriate requests.
+ * @param[in] server A pointer to httpd server handle.
+ * @return Return ESP_OK if succeeded.
+ */
 esp_err_t http_adapter_json_init(httpd_handle_t* server);
 
 #endif /* MAIN_HTTP_ADAPTER_JSON_H_ */

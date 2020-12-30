@@ -26,6 +26,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @file
+ * @author Vit Holasek
+ * @brief Main file with application entrypoint.
+ */
+
 #include <time.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
@@ -59,6 +65,9 @@ static httpd_handle_t server;
 static httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 #endif
 
+/**
+ * Handle Wi-Fi connection events and set related bits for tasks synchronization.
+ */
 static void event_handler(void* arg, esp_event_base_t event_base,
         int32_t event_id, void* event_data)
 {

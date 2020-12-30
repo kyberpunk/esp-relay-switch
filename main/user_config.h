@@ -29,24 +29,74 @@
 #ifndef MAIN_USER_CONFIG_H_
 #define MAIN_USER_CONFIG_H_
 
-#define WIFI_SSID "ssid"
+/**
+ * Wi-Fi SSID
+ */
+#ifndef WIFI_SSID
+#define WIFI_SSID "wifi"
+#endif
 
+/**
+ * Wi-Fi password
+ */
+#ifndef WIFI_PASSWORD
 #define WIFI_PASSWORD "password"
+#endif
 
+/**
+ * GPIO pin used as signal for relay. It must be configurable as output.
+ */
+#ifndef RELAY_GPIO_NUM
 #define RELAY_GPIO_NUM 4
+#endif
 
+/**
+ * Set to 1 to enable HTML web interface or 0 to disable.
+ */
+#ifndef HTTP_HTML_ENABLE
 #define HTTP_HTML_ENABLE 1
+#endif
 
+/**
+ * Set to 1 to enable HTTP API or 0 to disable.
+ */
+#ifndef HTTP_JSON_ENABLE
 #define HTTP_JSON_ENABLE 1
+#endif
 
+/**
+ * Set to 1 to enable MQTT interface or 0 to disable.
+ */
+#ifndef MQTT_ADAPTER_ENABLE
 #define MQTT_ADAPTER_ENABLE 1
+#endif
 
+/**
+ * Set to 1 if relay is connected by high input or 0 otherwise.
+ */
+#ifndef HIGH_ON
 #define HIGH_ON 0
+#endif
 
+/**
+ * IP address or DNS name of MQTT broker.
+ */
+#ifndef MQTT_BROKER_HOST
 #define MQTT_BROKER_HOST "192.168.100.46"
+#endif
 
+/**
+ * Unique device ID - important for MQTT.
+ */
+#ifndef SWITCH_ID
 #define SWITCH_ID "SWITCH1"
+#endif
 
+/**
+ * NTP server DNS name or IP.
+ */
+#ifndef NTP_SERVER
 #define NTP_SERVER "pool.ntp.org"
+#endif
 
 #endif /* MAIN_USER_CONFIG_H_ */

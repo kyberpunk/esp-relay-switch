@@ -26,6 +26,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @file
+ * @author Vit Holasek
+ * @brief This file implements HTTP API which handles requests for reading current state and sending switching requests.
+ * It can be used by automatized script and applications. JSON payload serialization is used. All requests must include /state
+ * resource prefix in URL.
+ */
+
 #include <esp_log.h>
 
 #include "http_adapter_json.h"

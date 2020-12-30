@@ -26,6 +26,13 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @file
+ * @author Vit Holasek
+ * @brief This file implements MQTT adapter. It sends notification messages witch current switch state when it is changed.
+ * It also listens for switcing requests on separate topic.
+ */
+
 #include <string.h>
 #include <stdio.h>
 #include <mqtt_client.h>

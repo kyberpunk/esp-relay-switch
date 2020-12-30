@@ -26,6 +26,13 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @file
+ * @author Vit Holasek
+ * @brief This file implements web interface. It can be used for controlling the switch directly from browser. Web interface provides HTML
+ * page on root URL path which shows current state and provides action for switching on/off the switch.
+ */
+
 #include <string.h>
 #include <esp_http_server.h>
 #include <time.h>
@@ -35,6 +42,9 @@
 #include "http_adapter_html.h"
 #include "relay_switch.h"
 
+/**
+ * HTML content of default web page containing current state information.
+ */
 #define DEFAULT_HTML "<!DOCTYPE html>\n" \
 "<html>\n" \
 "<head>\n" \
@@ -60,6 +70,9 @@
 "</body>\n" \
 "</html>"
 
+/**
+ * HTML page which renders confirmation after sucessfully executing switching request.
+ */
 #define POST_SUCCESS_RESPONSE_HTML "<!DOCTYPE html>\n" \
 "<html>\n" \
 "<head>\n" \
@@ -80,6 +93,9 @@
 "</body>\n" \
 "</html>"
 
+/**
+ * HTML page which renders erro information after executing switching requestfailed.
+ */
 #define POST_ERROR_RESPONSE_HTML "<!DOCTYPE html>\n" \
 "<html>\n" \
 "<head>\n" \
@@ -166,6 +182,9 @@ static esp_err_t get_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
+/**
+ * Parse switching request data from HTTP request.
+ */
 static esp_err_t parse_switch_payload(httpd_req_t *req, bool *value, uint32_t *timeout)
 {
     esp_err_t error = ESP_FAIL;

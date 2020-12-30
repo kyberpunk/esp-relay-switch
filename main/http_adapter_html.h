@@ -26,12 +26,24 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @file
+ * @author Vit Holasek
+ * @brief This file contains functions for managing HTML web interface adapter. Adapter provides web interface which can be used by user for 
+ * directly controlling the switch.
+ */
+
 #ifndef MAIN_HTTP_ADAPTER_HTML_H_
 #define MAIN_HTTP_ADAPTER_HTML_H_
 
 #include <esp_http_server.h>
 #include "esp_err.h"
 
+/**
+ * Initialize and start HTML web interface adapter. HTTP server providing HTML pages is started.
+ * @param[in] server A pointer to httpd server handle.
+ * @return Return ESP_OK if succeeded.
+ */
 esp_err_t http_adapter_html_init(httpd_handle_t *server);
 
 #endif /* MAIN_HTTP_ADAPTER_HTML_H_ */

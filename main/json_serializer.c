@@ -26,6 +26,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @file
+ * @author Vit Holasek
+ * @brief This file implements serialization and deserialization of JSON data used for MQTT and HTTP API.
+ */
+
 #include <esp_log.h>
 #include <string.h>
 

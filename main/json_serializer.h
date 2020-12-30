@@ -26,6 +26,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @file
+ * @author Vit Holasek
+ * @brief This file contains functions for serialization and deserialization of JSON model data for MQTT and HTTP API.
+ */
+
 #ifndef JSON_SERIALIZER_H_
 #define JSON_SERIALIZER_H_
 
@@ -33,10 +39,28 @@
 
 #include "relay_switch.h"
 
+/**
+ * Deserialize switching request data from JSON serialized string.
+ * @param[in] received_data A pointer to string with JSON payload.
+ * @param[out] value A pointer to switch value variable to be set.
+ * @param[out] timeout A pointer to timeout variable to be set.
+ * @return Return ESP_OK if succeeded.
+ */
 esp_err_t json_serializer_deserialize(const char *received_data, bool *value, uint32_t *timeout);
 
+/**
+ * Serialize data about current switch state to JSON. Output serialized string must be freed when it is not needed anymore.
+ * @param[in] switch_state A pointer to switch state dtaa to be serialized.
+ * @param[out] serialized_string A pointer to string valiable for setting serialized string.
+ * @param[out] length A pointer to variable with serialized string length to be set.
+ * @return Return ESP_OK if succeeded.
+ */
 esp_err_t json_serializer_serialize(const relay_switch_state_t *switch_state, char **serialized_string, size_t *length);
 
+/**
+ * Free allocated string with serialized JSON data.
+ * @param[in] serialized_string A pointer to string with serialized data to be freed.
+ */
 void json_serializer_free(char *serialized_string);
 
 #endif /* JSON_SERIALIZER_H_ */

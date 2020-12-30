@@ -26,6 +26,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @file
+ * @author Vit Holasek
+ * @brief Implementation of switch state handling.
+ */
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <driver/gpio.h>
@@ -153,6 +159,7 @@ esp_err_t relay_switch_set_state_internal(bool switch_on, uint32_t timeout)
     {
         scheduled_switch.timeout = timeout;
         scheduled_switch.is_switched_on = !switch_on;
+        // Schedule task which changes switch position after timeout elapsed
         xTaskCreate(relay_switch_timeout_task, "measurement_task_run", 4096, &scheduled_switch, tskIDLE_PRIORITY, &timeout_task);
     }
     if (state_changed_callback != NULL)

@@ -29,12 +29,28 @@
 #ifndef MAIN_MQTT_ADAPTER_H_
 #define MAIN_MQTT_ADAPTER_H_
 
+/**
+ * @file
+ * @author Vit Holasek
+ * @brief This file contains functions for managing MQTT adapter. Adapter provides MQTT topic for notifying about switch state changes
+ * and sending switching requests.
+ */
+
 #include <esp_err.h>
 
 #include "relay_switch.h"
 
+/**
+ * Initialize and start MQTT adapter. MQTT client is started and appropriate topics are subscribed.
+ * @return Return ESP_OK if succeeded.
+ */
 esp_err_t mqtt_adapter_init(void);
 
+/**
+ * Send message with new switch state data to the topic.
+ * @param[in] switch_state A pointer to current switch state data.
+ * @return Return ESP_OK if succeeded.
+ */
 esp_err_t mqtt_adapter_notify_switch_status(const relay_switch_state_t* switch_state);
 
 #endif /* MAIN_MQTT_ADAPTER_H_ */
